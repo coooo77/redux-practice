@@ -10,11 +10,11 @@ export type UserState = User[]
 
 export const initialState: UserState = [
   {
-    id: '1',
+    id: crypto.randomUUID(),
     name: 'Lorem',
   },
   {
-    id: '2',
+    id: crypto.randomUUID(),
     name: 'ipsum',
   },
 ]

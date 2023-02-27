@@ -7,6 +7,7 @@ interface Post {
   id: string
   title: string
   content: string
+  userId: string
 }
 
 export type PostsState = Post[]
@@ -16,11 +17,13 @@ export const initialState: PostsState = [
     id: '1',
     title: 'this is title',
     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+    userId: crypto.randomUUID(),
   },
   {
     id: '2',
     title: 'this is title2',
     content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+    userId: crypto.randomUUID(),
   },
 ]
 
