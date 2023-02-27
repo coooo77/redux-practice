@@ -25,12 +25,17 @@ export const initialState: PostsState = [
 export const postsSlice = createSlice({
   name: 'posts',
   initialState,
-  reducers: {},
+  reducers: {
+    // redux 使用 immer.js ， 所以可以放心針對物件直接操作
+    postAdded(state, action: PayloadAction<Post>) {
+      state.push(action.payload)
+    },
+  },
 })
 
 // 為了避免未來 postsSlice initialState 結構有變化，改在這邊輸出取得所有 posts 的方法
 export const selectAllPosts = (state: RootState) => state.posts
 
-export const {} = postsSlice.actions
+export const {postAdded} = postsSlice.actions
 
 export default postsSlice.reducer
