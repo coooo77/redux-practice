@@ -14,13 +14,7 @@ const AddPostForm = () => {
 
     if (!(title || content)) return
 
-    dispatch(
-      postAdded({
-        id: crypto.randomUUID(),
-        title,
-        content,
-      })
-    )
+    dispatch(postAdded(title, content))
 
     setTitle('')
     setContent('')
