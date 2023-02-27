@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '../../app/store'
 
+import { User } from '../users/usersSlice'
+
 interface Post {
   id: string
   title: string
@@ -30,12 +32,13 @@ export const postsSlice = createSlice({
       reducer(state, action: PayloadAction<Post>) {
         state.push(action.payload)
       },
-      prepare(title: string, content: string) {
+      prepare(title: string, content: string, userId: User['id']) {
         return {
           payload: {
             id: crypto.randomUUID(),
             title,
             content,
+            userId,
           },
         }
       },
