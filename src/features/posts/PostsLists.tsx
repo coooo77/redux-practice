@@ -1,24 +1,41 @@
 import { useAppDispatch, useAppSelector } from '../../app/utils'
-import { selectAllPosts } from './postsSlice'
+import { selectAllPosts, getPostsStatus, getPostsError, fetchPosts } from './postsSlice'
 import PostAuthor from './PostAuthor'
+import PostExcerpt from './PostExcerpt'
+import { useEffect } from 'react'
 
 const PostsLists = () => {
-  const posts = useAppSelector(selectAllPosts)
+  const dispatch = useAppDispatch()
 
-  const renderedPosts = posts.map(({ id, content, title, userId }) => (
-    <article key={id}>
-      <h3>{title}</h3>
-      <p>{content.substring(0, 100)}</p>
-      <p className="postCredit">
-        <PostAuthor userId={userId} />
-      </p>
-    </article>
-  ))
+  const posts = useAppSelector(selectAllPosts)
+  const postsError = useAppSelector(getPostsError)
+  const postsStatus = useAppSelector(getPostsStatus)
+
+  useEffect(() => {
+    if (postsStatus === 'idle') {
+      dispatch(fetchPosts())
+    }
+  }, [postsStatus])
+
+  let content = null
+  switch (postsStatus) {
+    case 'loading':
+      content = <p>"Loading ..."</p>
+      break
+    case 'succeeded':
+      content = posts.slice().map((post) => <PostExcerpt key={post.id} post={post} />)
+      break
+    case 'failed':
+      content = <p>{postsError}</p>
+      break
+    default:
+      break
+  }
 
   return (
     <section>
       <h2>Posts</h2>
-      {renderedPosts}
+      {content}
     </section>
   )
 }
