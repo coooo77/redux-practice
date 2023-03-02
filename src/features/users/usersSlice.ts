@@ -1,5 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { RootState } from '../../app/store'
+import axios from 'axios'
+
+const USERS_URL = 'https://jsonplaceholder.typicode.com/users'
 
 export interface User {
   id: string
@@ -8,21 +11,25 @@ export interface User {
 
 export type UserState = User[]
 
+export const fetchUsers = createAsyncThunk('users/fetchUsers', async () => {
+  const response = await axios.get(USERS_URL)
+  return response.data
+})
+
 export const initialState: UserState = [
-  {
-    id: crypto.randomUUID(),
-    name: 'Lorem',
-  },
-  {
-    id: crypto.randomUUID(),
-    name: 'ipsum',
-  },
+
 ]
 
 export const usersSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {},
+  extraReducers(builder) {
+    builder.addCase(fetchUsers.fulfilled, (state, action) => {
+      // 等同於 state = action.payload
+      return action.payload
+    })
+  },
 })
 
 // 為了避免未來 postsSlice initialState 結構有變化，改在這邊輸出取得所有 posts 的方法
