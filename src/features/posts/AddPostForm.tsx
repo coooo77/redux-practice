@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { postAdded } from './postsSlice'
+import { addNewPost, PostStatus } from './postsSlice'
 import { selectAllUsers } from '../users/usersSlice'
 import { useAppDispatch, useAppSelector } from '../../app/utils'
 
@@ -11,6 +11,7 @@ const AddPostForm = () => {
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
+  const [addRequestStatus, setAddRequestStatus] = useState<PostStatus>('idle')
 
   const usersOptions = users.map((user) => (
     <option key={user.id} value={user.id}>
@@ -18,18 +19,25 @@ const AddPostForm = () => {
     </option>
   ))
 
+  const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+
   const onSavePostClicked = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
 
-    if (!(title || content || userId)) return
+    if (!canSave) return
 
-    dispatch(postAdded(title, content, userId))
-
-    setTitle('')
-    setContent('')
+    try {
+      //  Redux Toolkit adds a .unwrap() function to the returned Promise, which will return a new Promise that either has the actual action.payload value from a fulfilled action, or throws an error if it’s the rejected action. This lets us handle success and failure in the component using normal try/catch logic
+      dispatch(addNewPost({ title, body: content, userId })).unwrap()
+      setTitle('')
+      setContent('')
+      setUserId('')
+    } catch (error) {
+      console.error('Failed to save the post', error)
+    } finally {
+      setAddRequestStatus('idle')
+    }
   }
-
-  const canSave = [title, content, userId].every(Boolean)
 
   return (
     <section>

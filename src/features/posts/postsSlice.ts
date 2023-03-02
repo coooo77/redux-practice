@@ -18,6 +18,17 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   return data
 })
 
+interface AddNewPostParams {
+  title: string
+  body: string
+  userId: string
+}
+
+export const addNewPost = createAsyncThunk('posts/addNewPost', async (initialPost: AddNewPostParams) => {
+  const response = await axios.post(POSTS_URL, initialPost)
+  return response.data as PostsFetched
+})
+
 export interface Post {
   id: string
   title: string
@@ -25,11 +36,11 @@ export interface Post {
   userId: string
 }
 
-export type Status = 'idle' | 'loading' | 'succeeded' | 'failed'
+export type PostStatus = 'idle' | 'loading' | 'succeeded' | 'failed'
 
 export interface PostsState {
   posts: Post[]
-  status: Status
+  status: PostStatus
   error: undefined | string
 }
 
@@ -37,6 +48,15 @@ export const initialState: PostsState = {
   posts: [],
   status: 'idle',
   error: undefined,
+}
+
+const postFetchedToPost = (post: PostsFetched) => {
+  return {
+    id: String(post.id),
+    title: post.title,
+    userId: String(post.userId),
+    content: post.body,
+  }
 }
 
 export const postsSlice = createSlice({
@@ -66,17 +86,15 @@ export const postsSlice = createSlice({
       })
       .addCase(fetchPosts.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        const loadPosts = action.payload.map((post) => ({
-          id: String(post.id),
-          title: post.title,
-          userId: String(post.userId),
-          content: post.body,
-        }))
+        const loadPosts = action.payload.map(postFetchedToPost)
         state.posts = state.posts.concat(loadPosts)
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.error.message
+      })
+      .addCase(addNewPost.fulfilled, (state, action) => {
+        state.posts.push(postFetchedToPost(action.payload))
       })
   },
 })
