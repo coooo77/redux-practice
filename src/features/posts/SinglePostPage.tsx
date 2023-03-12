@@ -3,6 +3,7 @@ import { selectPostById } from './postsSlice'
 import { useAppSelector } from '../../app/utils'
 
 import { Link, useParams } from 'react-router-dom'
+import ReactionButtons from './ReactionButtons'
 
 const SinglePostPage = () => {
   const { postId } = useParams()
@@ -15,6 +16,7 @@ const SinglePostPage = () => {
         <Link to={`/post/edit/${post.id}`}>Edit Post</Link>
         <PostAuthor userId={post.userId} />
       </p>
+      <ReactionButtons post={post} />
     </article>
   ) : (
     <section>

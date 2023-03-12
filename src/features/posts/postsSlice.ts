@@ -42,11 +42,20 @@ export const deletePost = createAsyncThunk('posts/deletePost', async (initialPos
   return { id: null }
 })
 
+export interface Reactions {
+  thumbsUp: number
+  wow: number
+  heart: number
+  rocket: number
+  coffee: number
+}
+
 export interface Post {
   id: string
   title: string
   content: string
   userId: string
+  reactions: Reactions
 }
 
 export type PostStatus = 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -69,6 +78,13 @@ const postFetchedToPost = (post: PostsFetched) => {
     title: post.title,
     userId: String(post.userId),
     content: post.body,
+    reactions: {
+      thumbsUp: 0,
+      wow: 0,
+      heart: 0,
+      rocket: 0,
+      coffee: 0,
+    },
   }
 }
 
@@ -87,9 +103,23 @@ export const postsSlice = createSlice({
             title,
             content,
             userId,
+            reactions: {
+              thumbsUp: 0,
+              wow: 0,
+              heart: 0,
+              rocket: 0,
+              coffee: 0,
+            },
           },
         }
       },
+    },
+    reactionAdded(state, action: PayloadAction<{ postId: string; reaction: keyof Reactions }>) {
+      const { postId, reaction } = action.payload
+      const existingPost = state.posts.find((post) => post.id === postId)
+      if (existingPost) {
+        existingPost.reactions[reaction]++
+      }
     },
   },
   extraReducers(builder) {
@@ -130,6 +160,6 @@ export const getPostsError = (state: RootState) => state.posts.error
 
 export const selectPostById = (state: RootState, postId: string) => state.posts.posts.find((post) => post.id === postId)
 
-export const { postAdded } = postsSlice.actions
+export const { postAdded, reactionAdded } = postsSlice.actions
 
 export default postsSlice.reducer

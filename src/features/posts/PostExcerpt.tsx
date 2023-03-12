@@ -3,6 +3,7 @@ import { Post } from './postsSlice'
 import PostAuthor from './PostAuthor'
 
 import { Link } from 'react-router-dom'
+import ReactionButtons from './ReactionButtons'
 
 const PostExcerpt = (props: { post: Post }) => {
   const { id, content, title, userId } = props.post
@@ -14,6 +15,7 @@ const PostExcerpt = (props: { post: Post }) => {
         <Link to={`post/${id}`}>View Post</Link>
         <PostAuthor userId={userId} />
       </p>
+      <ReactionButtons post={props.post} />
     </article>
   )
 }
