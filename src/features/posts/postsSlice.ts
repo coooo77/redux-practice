@@ -18,15 +18,28 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
   return data
 })
 
-interface AddNewPostParams {
+interface updatePostParams {
   title: string
   body: string
   userId: string
 }
 
-export const addNewPost = createAsyncThunk('posts/addNewPost', async (initialPost: AddNewPostParams) => {
+export const addNewPost = createAsyncThunk('posts/addNewPost', async (initialPost: updatePostParams) => {
   const response = await axios.post(POSTS_URL, initialPost)
   return response.data as PostsFetched
+})
+
+export const updatePost = createAsyncThunk('posts/updatePost', async (initialPost: Post) => {
+  const { id } = initialPost
+  const response = await axios.put(`${POSTS_URL}/${id}`, initialPost)
+  return response.data as Post
+})
+
+export const deletePost = createAsyncThunk('posts/deletePost', async (initialPost: { id: string }) => {
+  const { id } = initialPost
+  const response = await axios.delete(`${POSTS_URL}/${id}`)
+  if (response?.status === 200) return initialPost
+  return { id: null }
 })
 
 export interface Post {
@@ -95,6 +108,17 @@ export const postsSlice = createSlice({
       })
       .addCase(addNewPost.fulfilled, (state, action) => {
         state.posts.push(postFetchedToPost(action.payload))
+      })
+      .addCase(updatePost.fulfilled, (state, action) => {
+        const { id } = action.payload
+        if (!id) return
+        const otherPost = state.posts.filter((post) => post.id !== id)
+        state.posts = otherPost.concat(action.payload)
+      })
+      .addCase(deletePost.fulfilled, (state, action) => {
+        const { id } = action.payload
+        if (!id) return
+        state.posts = state.posts.filter((post) => post.id !== id)
       })
   },
 })

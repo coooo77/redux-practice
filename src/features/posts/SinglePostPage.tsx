@@ -2,7 +2,7 @@ import PostAuthor from './PostAuthor'
 import { selectPostById } from './postsSlice'
 import { useAppSelector } from '../../app/utils'
 
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 const SinglePostPage = () => {
   const { postId } = useParams()
@@ -12,6 +12,7 @@ const SinglePostPage = () => {
       <h2>{post.title}</h2>
       <p>{post.content}</p>
       <p className="postCredit">
+        <Link to={`/post/edit/${post.id}`}>Edit Post</Link>
         <PostAuthor userId={post.userId} />
       </p>
     </article>
