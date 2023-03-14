@@ -20,4 +20,4 @@ const PostExcerpt = (props: { post: Post }) => {
   )
 }
 
-export default PostExcerpt
+export default React.memo(PostExcerpt)
