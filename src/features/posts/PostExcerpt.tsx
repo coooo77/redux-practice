@@ -6,8 +6,16 @@ import { Link } from 'react-router-dom'
 import ReactionButtons from './ReactionButtons'
 import TimeAgo from './TimeAgo'
 
-const PostExcerpt = (props: { post: Post }) => {
-  const { id, content, title, userId, date } = props.post
+import { useAppSelector } from '../../app/utils'
+import { selectPostById } from './postsSlice'
+import type { EntityId } from '@reduxjs/toolkit'
+
+const PostExcerpt = (props: { postId: EntityId }) => {
+  const post = useAppSelector((state) => selectPostById(state, props.postId))
+  
+  if (!post) return <></>
+
+  const { title, content, id, userId, date } = post
   return (
     <article>
       <h3>{title}</h3>
@@ -17,7 +25,7 @@ const PostExcerpt = (props: { post: Post }) => {
         <PostAuthor userId={userId} />
         <TimeAgo timestamp={date} />
       </p>
-      <ReactionButtons post={props.post} />
+      <ReactionButtons post={post} />
     </article>
   )
 }

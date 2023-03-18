@@ -1,9 +1,9 @@
 import { useAppSelector } from '../../app/utils'
-import { selectAllPosts, getPostsStatus, getPostsError } from './postsSlice'
+import { selectPostIds, getPostsStatus, getPostsError } from './postsSlice'
 import PostExcerpt from './PostExcerpt'
 
 const PostsLists = () => {
-  const posts = useAppSelector(selectAllPosts)
+  const orderedPostIds = useAppSelector(selectPostIds)
   const postsError = useAppSelector(getPostsError)
   const postsStatus = useAppSelector(getPostsStatus)
 
@@ -13,7 +13,7 @@ const PostsLists = () => {
       content = <p>"Loading ..."</p>
       break
     case 'succeeded':
-      content = posts.slice().map((post, index) => <PostExcerpt key={`${index}_${post.id}`} post={post} />)
+      content = orderedPostIds.map((postId, index) => <PostExcerpt key={`${index}_${postId}`} postId={postId} />)
       break
     case 'failed':
       content = <p>{postsError}</p>

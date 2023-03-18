@@ -1,15 +1,17 @@
-import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit'
+import { createSlice, PayloadAction, createAsyncThunk, createSelector, createEntityAdapter } from '@reduxjs/toolkit'
 import { RootState } from '../../app/store'
 
 import { User } from '../users/usersSlice'
 import axios from 'axios'
 import { sub } from 'date-fns'
 
+import type { EntityId } from '@reduxjs/toolkit'
+
 const POSTS_URL = 'https://jsonplaceholder.typicode.com/posts'
 
 interface PostsFetched {
   userId: number
-  id: number
+  id: EntityId
   title: string
   body: string
 }
@@ -63,18 +65,21 @@ export interface Post {
 export type PostStatus = 'idle' | 'loading' | 'succeeded' | 'failed'
 
 export interface PostsState {
-  posts: Post[]
   status: PostStatus
   error: undefined | string
   count: number
 }
 
-export const initialState: PostsState = {
-  posts: [],
+const postAdapter = createEntityAdapter<Post>({
+  selectId: (post) => post.title,
+  sortComparer: (a, b) => b.date.localeCompare(a.date),
+})
+
+export const initialState = postAdapter.getInitialState({
   status: 'idle',
   error: undefined,
   count: 0,
-}
+} as PostsState)
 
 const postFetchedToPost = (post: PostsFetched, index: number) => {
   return {
@@ -99,7 +104,7 @@ export const postsSlice = createSlice({
   reducers: {
     postAdded: {
       reducer(state, action: PayloadAction<Post>) {
-        state.posts.push(action.payload)
+        postAdapter.addOne(state, action.payload)
       },
       prepare(title: string, content: string, userId: User['id']) {
         return {
@@ -122,7 +127,7 @@ export const postsSlice = createSlice({
     },
     reactionAdded(state, action: PayloadAction<{ postId: string; reaction: keyof Reactions }>) {
       const { postId, reaction } = action.payload
-      const existingPost = state.posts.find((post) => post.id === postId)
+      const existingPost = state.entities[postId]
       if (existingPost) {
         existingPost.reactions[reaction]++
       }
@@ -139,36 +144,34 @@ export const postsSlice = createSlice({
       .addCase(fetchPosts.fulfilled, (state, action) => {
         state.status = 'succeeded'
         const loadPosts = action.payload.map(postFetchedToPost)
-        state.posts = state.posts.concat(loadPosts)
+        postAdapter.upsertMany(state, loadPosts)
       })
       .addCase(fetchPosts.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.error.message
       })
       .addCase(addNewPost.fulfilled, (state, action) => {
-        state.posts.push(postFetchedToPost(action.payload, state.posts.length))
+        postAdapter.addOne(state, postFetchedToPost(action.payload, Object.keys(state.entities).length))
       })
       .addCase(updatePost.fulfilled, (state, action) => {
         const { id } = action.payload
         if (!id) return
-        const otherPost = state.posts.filter((post) => post.id !== id)
-        state.posts = otherPost.concat(action.payload)
+        postAdapter.upsertOne(state, action.payload)
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         const { id } = action.payload
         if (!id) return
-        state.posts = state.posts.filter((post) => post.id !== id)
+        postAdapter.removeOne(state, id)
       })
   },
 })
 
 // 為了避免未來 postsSlice initialState 結構有變化，改在這邊輸出取得所有 posts 的方法
-export const selectAllPosts = (state: RootState) => state.posts.posts
 export const getPostsStatus = (state: RootState) => state.posts.status
 export const getPostsError = (state: RootState) => state.posts.error
 export const getCount = (state: RootState) => state.posts.count
 
-export const selectPostById = (state: RootState, postId: string) => state.posts.posts.find((post) => post.id === postId)
+export const { selectAll: selectAllPosts, selectById: selectPostById, selectIds: selectPostIds } = postAdapter.getSelectors<RootState>((state) => state.posts)
 
 export const selectPostsByUser = createSelector(
   // input function
