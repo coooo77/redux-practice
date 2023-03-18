@@ -3,6 +3,7 @@ import { RootState } from '../../app/store'
 
 import { User } from '../users/usersSlice'
 import axios from 'axios'
+import { sub } from 'date-fns'
 
 const POSTS_URL = 'https://jsonplaceholder.typicode.com/posts'
 
@@ -56,6 +57,7 @@ export interface Post {
   content: string
   userId: string
   reactions: Reactions
+  date: string
 }
 
 export type PostStatus = 'idle' | 'loading' | 'succeeded' | 'failed'
@@ -74,7 +76,7 @@ export const initialState: PostsState = {
   count: 0,
 }
 
-const postFetchedToPost = (post: PostsFetched) => {
+const postFetchedToPost = (post: PostsFetched, index: number) => {
   return {
     id: String(post.id),
     title: post.title,
@@ -87,6 +89,7 @@ const postFetchedToPost = (post: PostsFetched) => {
       rocket: 0,
       coffee: 0,
     },
+    date: sub(new Date(), { minutes: Math.random() * index }).toISOString(),
   }
 }
 
@@ -105,6 +108,7 @@ export const postsSlice = createSlice({
             title,
             content,
             userId,
+            date: new Date().toISOString(),
             reactions: {
               thumbsUp: 0,
               wow: 0,
@@ -142,7 +146,7 @@ export const postsSlice = createSlice({
         state.error = action.error.message
       })
       .addCase(addNewPost.fulfilled, (state, action) => {
-        state.posts.push(postFetchedToPost(action.payload))
+        state.posts.push(postFetchedToPost(action.payload, state.posts.length))
       })
       .addCase(updatePost.fulfilled, (state, action) => {
         const { id } = action.payload

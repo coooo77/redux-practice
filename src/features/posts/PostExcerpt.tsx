@@ -4,9 +4,10 @@ import PostAuthor from './PostAuthor'
 
 import { Link } from 'react-router-dom'
 import ReactionButtons from './ReactionButtons'
+import TimeAgo from './TimeAgo'
 
 const PostExcerpt = (props: { post: Post }) => {
-  const { id, content, title, userId } = props.post
+  const { id, content, title, userId, date } = props.post
   return (
     <article>
       <h3>{title}</h3>
@@ -14,6 +15,7 @@ const PostExcerpt = (props: { post: Post }) => {
       <p className="postCredit">
         <Link to={`post/${id}`}>View Post</Link>
         <PostAuthor userId={userId} />
+        <TimeAgo timestamp={date} />
       </p>
       <ReactionButtons post={props.post} />
     </article>
