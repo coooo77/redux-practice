@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faUpload } from '@fortawesome/free-solid-svg-icons'
 
+import { useGetTodosQuery } from '../api/apiSlice'
+
 import type { FormEvent } from 'react'
 
 const TodoList = () => {
@@ -25,8 +27,13 @@ const TodoList = () => {
     </form>
   )
 
-  let content
-  // Define conditional content
+  const { data: todos, isLoading, isSuccess, isError, error } = useGetTodosQuery()
+
+  // prettier-ignore
+  const content = isLoading ? <p>Loading ...</p>
+    : isSuccess ? JSON.stringify(todos)
+    : isError ? <p>{error.toString()}</p>
+    : null
 
   return (
     <main>
