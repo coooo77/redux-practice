@@ -10,7 +10,7 @@ export interface Todo {
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3500' }),
-  tagTypes: ['Todos'],
+  tagTypes: ['Todos', 'Post'],
   endpoints: (builder) => ({
     getTodos: builder.query<Todo[], void>({
       query: () => '/todos',

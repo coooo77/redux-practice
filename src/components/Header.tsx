@@ -1,10 +1,6 @@
 import { Link } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '../app/utils'
-import { getCount, increaseCount } from '../features/posts/postsSlice'
 
 const Header = () => {
-  const dispatch = useAppDispatch()
-  const count = useAppSelector(getCount)
   return (
     <header className="Header">
       <h1>Redux Blog</h1>
@@ -23,7 +19,6 @@ const Header = () => {
             <Link to="/todo">Todo</Link>
           </li>
         </ul>
-        <button onClick={() => dispatch(increaseCount())}>{count}</button>
       </nav>
     </header>
   )

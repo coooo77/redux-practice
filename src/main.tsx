@@ -6,17 +6,18 @@ import './index.css'
 // import redux store
 import { store } from './app/store'
 import { Provider } from 'react-redux'
-import { fetchPosts } from './features/posts/postsSlice'
 import { fetchUsers } from './features/users/usersSlice'
 
 import { apiSlice } from './features/api/apiSlice'
 import { ApiProvider } from '@reduxjs/toolkit/query/react'
+import { extendedApiSlice } from './features/posts/postsSlice'
+
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
 // fetch users right after app starts
 store.dispatch(fetchUsers())
-store.dispatch(fetchPosts())
+store.dispatch(extendedApiSlice.endpoints.getPosts.initiate())
 
 //
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
