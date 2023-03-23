@@ -1,17 +1,20 @@
 import { useState } from 'react'
 
-import { addNewPost, PostStatus } from './postsSlice'
+import { useAddNewPostMutation } from './postsSlice'
 import { selectAllUsers } from '../users/usersSlice'
-import { useAppDispatch, useAppSelector } from '../../app/utils'
+import { useAppSelector } from '../../app/utils'
+import { useNavigate } from 'react-router-dom'
 
 const AddPostForm = () => {
-  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  
+  const [addNewPost, {isLoading}] = useAddNewPostMutation()
+
   const users = useAppSelector(selectAllUsers)
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
-  const [addRequestStatus, setAddRequestStatus] = useState<PostStatus>('idle')
 
   const usersOptions = users.map((user) => (
     <option key={user.id} value={user.id}>
@@ -19,23 +22,21 @@ const AddPostForm = () => {
     </option>
   ))
 
-  const canSave = [title, content, userId].every(Boolean) && addRequestStatus === 'idle'
+  const canSave = [title, content, userId].every(Boolean) && !isLoading
 
-  const onSavePostClicked = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const onSavePostClicked = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault()
 
     if (!canSave) return
 
     try {
-      //  Redux Toolkit adds a .unwrap() function to the returned Promise, which will return a new Promise that either has the actual action.payload value from a fulfilled action, or throws an error if it’s the rejected action. This lets us handle success and failure in the component using normal try/catch logic
-      dispatch(addNewPost({ title, body: content, userId })).unwrap()
+      await addNewPost({title, content, userId}).unwrap()
       setTitle('')
       setContent('')
       setUserId('')
+      navigate('/')
     } catch (error) {
       console.error('Failed to save the post', error)
-    } finally {
-      setAddRequestStatus('idle')
     }
   }
 
