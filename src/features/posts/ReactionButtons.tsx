@@ -1,6 +1,6 @@
-import { useAppDispatch } from "../../app/utils";
-import {reactionAdded} from './postsSlice'
 import type { Post, Reactions } from './postsSlice'
+
+import { useAddReactionMutation } from './postsSlice'
 
 const reactionEmoji: Record<keyof Reactions, string> = {
   thumbsUp: '👍',
@@ -11,13 +11,18 @@ const reactionEmoji: Record<keyof Reactions, string> = {
 }
 
 const ReactionButtons = ({ post }: { post: Post }) => {
-  const dispatch = useAppDispatch()
+  const [addReaction] = useAddReactionMutation()
+
+  const handleAddReaction = async (post: Post, name: keyof Reactions) => {
+    const newValue = post.reactions ? post.reactions[name] + 1 : 1
+    await addReaction({ postId: post.id, reactions: { ...post.reactions, [name]: newValue } as Post['reactions'] })
+  }
 
   const reactionButtons = Object.entries(reactionEmoji).map(([name, emoji]) => {
     const emojiName = name as keyof Reactions
     return (
-      <button key={name} type="button" className="reactionButton" onClick={() => dispatch(reactionAdded({ postId: post.id, reaction: emojiName }))}>
-        {emoji} {post.reactions[emojiName]}
+      <button key={name} type="button" className="reactionButton" onClick={() => handleAddReaction(post, emojiName)}>
+        {emoji} {post.reactions?.[emojiName]}
       </button>
     )
   })
