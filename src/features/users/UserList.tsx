@@ -1,15 +1,16 @@
-import { useAppSelector } from '../../app/utils'
-import { selectAllUsers } from './usersSlice'
+import { useGetUsersQuery } from './usersSlice'
 import { Link } from 'react-router-dom'
 
 const UserList = () => {
-  const users = useAppSelector(selectAllUsers)
+  const { data: users, isSuccess } = useGetUsersQuery()
 
-  const renderedUsers = users.map((user) => (
-    <li key={user.id}>
-      <Link to={`/user/${user.id}`}>{user.name}</Link>
-    </li>
-  ))
+  const renderedUsers = isSuccess
+    ? users.ids.map((id) => (
+        <li key={id}>
+          <Link to={`/user/${id}`}>{users.entities[id]?.name}</Link>
+        </li>
+      ))
+    : null
 
   return (
     <section>

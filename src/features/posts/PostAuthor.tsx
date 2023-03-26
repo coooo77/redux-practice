@@ -1,4 +1,4 @@
-import { selectAllUsers } from '../users/usersSlice'
+import { useGetUsersQuery } from '../users/usersSlice'
 import { useAppSelector } from '../../app/utils'
 
 import { FC } from 'react'
@@ -8,10 +8,20 @@ interface PropsPostAuthor {
   userId: string
 }
 
-const PostAuthor: FC<PropsPostAuthor> = (props) => {  
-  const users = useAppSelector(selectAllUsers)
-  const author = users.find((user) => +user.id === +props.userId)
-  return <span>by {author ? <Link to={`/user/${props.userId}`}>{author.name}</Link> : 'Unknown author'}</span>
+const PostAuthor: FC<PropsPostAuthor> = (props) => {
+  const { user: author } = useGetUsersQuery(undefined, {
+    // 這裡的arg等同於useGetUsersQuery預設回傳的值
+    selectFromResult: (params) => {
+      const { data } = params
+      // 這裡的回傳值會改寫useGetUsersQuery回傳的值
+      return { user: data?.entities[props.userId] }
+    },
+  })
+  return <span>by {
+    author
+      ? <Link to={`/user/${props.userId}`}>{author.name}</Link>
+      : 'Unknown author'
+  }</span>
 }
 
 export default PostAuthor

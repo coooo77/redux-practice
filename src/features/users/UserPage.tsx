@@ -1,5 +1,5 @@
 import { useAppSelector } from '../../app/utils'
-import { selectUserById } from './usersSlice'
+import { useGetUsersQuery } from './usersSlice'
 import { Link, useParams } from 'react-router-dom'
 
 import { type Post, useGetPostsByUserIdQuery } from '../posts/postsSlice'
@@ -7,7 +7,21 @@ import { EntityState } from '@reduxjs/toolkit'
 
 const UserPage = () => {
   const { userId } = useParams()
-  const user = useAppSelector((state) => selectUserById(state, userId))
+
+  const {
+    user,
+    isLoading: isLoadingUser,
+    isSuccess: isSuccessUser,
+    isError: isErrorUser,
+  } = useGetUsersQuery(undefined, {
+    selectFromResult: ({ data, isLoading, isSuccess, isError, error }) => ({
+      user: userId ? data?.entities[userId] : undefined,
+      isLoading,
+      isSuccess,
+      isError,
+      error,
+    }),
+  })
 
   const { data: postsFromUser, isLoading, isSuccess, isError } = useGetPostsByUserIdQuery(userId || '')
 
@@ -20,12 +34,14 @@ const UserPage = () => {
     ))
   }
 
-  // prettier-ignore
   const content =
-    isLoading ? <p>Loading...</p> :
-    isSuccess ? <ol>{postToList(postsFromUser)}</ol> :
-    isError ? <p>Error occurred</p> :
-    null
+    isLoading || isLoadingUser ? (
+      <p>Loading...</p>
+    ) : isSuccess && isSuccessUser ? (
+      <ol>{postToList(postsFromUser)}</ol>
+    ) : isError || isErrorUser ? (
+      <p>Error occurred</p>
+    ) : null
 
   return (
     <section>

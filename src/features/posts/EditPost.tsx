@@ -4,7 +4,7 @@ import { useAppSelector } from '../../app/utils'
 import { selectPostById } from './postsSlice'
 import { useParams, useNavigate } from 'react-router-dom'
 
-import { selectAllUsers } from '../users/usersSlice'
+import { useGetUsersQuery } from '../users/usersSlice'
 import { useUpdatePostMutation, useDeletePostMutation } from './postsSlice'
 
 const EditPostForm = () => {
@@ -12,13 +12,13 @@ const EditPostForm = () => {
   const navigate = useNavigate()
 
   const post = useAppSelector((state) => selectPostById(state, postId || ''))
-  const users = useAppSelector(selectAllUsers)
+  const { data: users, isSuccess } = useGetUsersQuery()
 
   const [title, setTitle] = useState(post?.title)
   const [content, setContent] = useState(post?.content)
   const [userId, setUserId] = useState(post?.userId)
 
-  const [updatePost, {isLoading}] = useUpdatePostMutation()
+  const [updatePost, { isLoading }] = useUpdatePostMutation()
   const [deletePost] = useDeletePostMutation()
   if (!post) {
     return (
@@ -47,15 +47,17 @@ const EditPostForm = () => {
         navigate(`/post/${postId}`)
       } catch (err) {
         console.error('Failed to save the post', err)
-      } 
+      }
     }
   }
 
-  const usersOptions = users.map((user) => (
-    <option key={user.id} value={user.id}>
-      {user.name}
-    </option>
-  ))
+  const usersOptions = isSuccess
+    ? users.ids.map((id) => (
+        <option key={id} value={id}>
+          {users.entities[id]?.name}
+        </option>
+      ))
+    : null
 
   const onDeletePostClicked = async () => {
     try {

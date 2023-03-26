@@ -1,26 +1,26 @@
 import { useState } from 'react'
 
 import { useAddNewPostMutation } from './postsSlice'
-import { selectAllUsers } from '../users/usersSlice'
-import { useAppSelector } from '../../app/utils'
+import { useGetUsersQuery } from '../users/usersSlice'
 import { useNavigate } from 'react-router-dom'
 
 const AddPostForm = () => {
   const navigate = useNavigate()
-  
-  const [addNewPost, {isLoading}] = useAddNewPostMutation()
 
-  const users = useAppSelector(selectAllUsers)
+  const [addNewPost, { isLoading }] = useAddNewPostMutation()
+  const { data: users, isSuccess } = useGetUsersQuery()
 
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [userId, setUserId] = useState('')
 
-  const usersOptions = users.map((user) => (
-    <option key={user.id} value={user.id}>
-      {user.name}
-    </option>
-  ))
+  const usersOptions = isSuccess
+    ? users.ids.map((id) => (
+        <option key={id} value={id}>
+          {users.entities[id]?.name}
+        </option>
+      ))
+    : null
 
   const canSave = [title, content, userId].every(Boolean) && !isLoading
 
@@ -30,7 +30,7 @@ const AddPostForm = () => {
     if (!canSave) return
 
     try {
-      await addNewPost({title, content, userId}).unwrap()
+      await addNewPost({ title, content, userId }).unwrap()
       setTitle('')
       setContent('')
       setUserId('')
