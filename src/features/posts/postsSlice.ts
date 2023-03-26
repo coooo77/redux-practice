@@ -8,14 +8,6 @@ import { sub } from 'date-fns'
 
 import type { EntityState } from '@reduxjs/toolkit'
 
-interface PostsFetched {
-  id: number
-  title: string
-  body: string
-  userId: number
-  date: string
-}
-
 export interface Reactions {
   thumbsUp: number
   wow: number
@@ -27,14 +19,14 @@ export interface Reactions {
 export interface Post {
   id: string
   title: string
-  content: string
+  body: string
   userId: string
   reactions?: Reactions
   date: string
 }
 
 const postsAdapter = createEntityAdapter<Post>({
-  selectId: (post) => post.title,
+  selectId: (post) => post.id,
   sortComparer: (a, b) => b.date.localeCompare(a.date),
 })
 
@@ -43,7 +35,7 @@ export const initialState = postsAdapter.getInitialState()
 function transformPost(post: Post, index: number): Post {
   return {
     ...post,
-    date: post.date || sub(new Date(), { minutes: index + 1 }).toString(),
+    date: post.date || new Date(sub(new Date(), { minutes: index + 1 }).toString()).toISOString(),
     reactions: post.reactions || { coffee: 0, rocket: 0, heart: 0, wow: 0, thumbsUp: 0 },
   }
 }
@@ -66,7 +58,7 @@ export const extendedApiSlice = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) => (result ? [...result.ids.map((id) => ({ type: 'Post' as const, id }))] : []),
     }),
 
-    addNewPost: builder.mutation<void, Pick<Post, 'title' | 'content' | 'userId'>>({
+    addNewPost: builder.mutation<void, Pick<Post, 'title' | 'body' | 'userId'>>({
       query: (initialPost) => ({
         url: '/posts',
         method: 'POST',

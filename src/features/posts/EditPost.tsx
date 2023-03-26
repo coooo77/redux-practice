@@ -15,7 +15,7 @@ const EditPostForm = () => {
   const { data: users, isSuccess } = useGetUsersQuery()
 
   const [title, setTitle] = useState(post?.title)
-  const [content, setContent] = useState(post?.content)
+  const [body, setBody] = useState(post?.body)
   const [userId, setUserId] = useState(post?.userId)
 
   const [updatePost, { isLoading }] = useUpdatePostMutation()
@@ -28,21 +28,20 @@ const EditPostForm = () => {
     )
   }
 
-  const canSave = [title, content, userId].every(Boolean) && !isLoading
+  const canSave = [title, body, userId].every(Boolean) && !isLoading
 
   const onSavePostClicked = async () => {
     if (canSave) {
       try {
-        const postToUpdate = Object.assign(post, {
-          title,
-          content,
-          userId,
-        })
-
-        await updatePost(postToUpdate).unwrap()
+        await updatePost({
+          ...post,
+          title: title || '',
+          body: body || '',
+          userId: userId || '',
+        }).unwrap()
 
         setTitle('')
-        setContent('')
+        setBody('')
         setUserId('')
         navigate(`/post/${postId}`)
       } catch (err) {
@@ -64,7 +63,7 @@ const EditPostForm = () => {
       await deletePost(post).unwrap()
 
       setTitle('')
-      setContent('')
+      setBody('')
       setUserId('')
       navigate('/')
     } catch (err) {
@@ -87,7 +86,7 @@ const EditPostForm = () => {
         </select>
 
         <label htmlFor="postContent">Content:</label>
-        <textarea id="postContent" name="postContent" value={content} onChange={(e) => setContent(e.target.value)} />
+        <textarea id="postContent" name="postContent" value={body} onChange={(e) => setBody(e.target.value)} />
 
         <button type="button" onClick={onSavePostClicked} disabled={!canSave}>
           Save Post

@@ -30,7 +30,7 @@ const AddPostForm = () => {
     if (!canSave) return
 
     try {
-      await addNewPost({ title, content, userId }).unwrap()
+      await addNewPost({ title, body: content, userId }).unwrap()
       setTitle('')
       setContent('')
       setUserId('')
